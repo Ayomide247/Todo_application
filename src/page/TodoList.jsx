@@ -8,6 +8,11 @@ const TodoList = () => {
   const { state, dispatch } = useTodo();
   const [newTodo, setNewTodo] = useState("");
   const [filter, setFilter] = useState("all");
+  const [isEditing, setIsEditing] = useState(false);
+  const [editData, setEditData] = useState({
+    id: "",
+    text: "",
+  });
 
   const handleAddTodo = () => {
     if (newTodo.trim()) {
@@ -20,9 +25,11 @@ const TodoList = () => {
   };
 
   const handleEditTodo = (id, text) => {
-    const newText = prompt("Edit Todo:", text);
-    if (newText) {
-      dispatch({ type: "EDIT_TODO", payload: { id, text: newText } });
+    // const newText = prompt("Edit Todo:", text);
+    if (text) {
+      dispatch({ type: "EDIT_TODO", payload: { id, text } });
+      setIsEditing(false);
+      setNewTodo("");
     }
   };
 
@@ -52,7 +59,7 @@ const TodoList = () => {
           <h1 className="text-xl md:text-2xl font-bold">TO DO</h1>
           <button
             onClick={() => dispatch({ type: "TOGGLE_THEME" })}
-            className={`px-4 py-2 rounded ${
+            className={`px-4 py-2 rounded cursor-pointer ${
               state.theme === "dark"
                 ? "bg-gray-800 text-white"
                 : "bg-gray-200 text-black"
@@ -81,10 +88,14 @@ const TodoList = () => {
             }`}
           />
           <button
-            onClick={handleAddTodo}
-            className="bg-blue-500 text-white px-4 py-2 rounded text-sm md:text-base"
+            onClick={() => {
+              isEditing
+                ? handleEditTodo(editData.id, newTodo)
+                : handleAddTodo();
+            }}
+            className="bg-blue-500 text-white px-10 py-2 rounded text-sm md:text-base cursor-pointer font-bold"
           >
-            Add
+            {isEditing ? "Update" : "Add"}
           </button>
         </section>
 
@@ -110,13 +121,22 @@ const TodoList = () => {
                   onClick={() =>
                     dispatch({ type: "TOGGLE_COMPLETE", payload: todo.id })
                   }
-                  className="text-green-500"
+                  className="text-green-500 cursor-pointer"
                 >
                   {todo.completed ? "Undo" : "Complete"}
                 </button>
                 <button
-                  onClick={() => handleEditTodo(todo.id, todo.text)}
-                  className="text-blue-500"
+                  onClick={() => {
+                    setIsEditing(true);
+                    console.log(editData);
+
+                    setEditData({
+                      id: todo.id,
+                      text: todo.text,
+                    });
+                    setNewTodo(todo.text);
+                  }}
+                  className="text-blue-500 cursor-pointer"
                 >
                   <AiOutlineEdit />
                 </button>
@@ -124,7 +144,7 @@ const TodoList = () => {
                   onClick={() =>
                     dispatch({ type: "DELETE_TODO", payload: todo.id })
                   }
-                  className="text-red-500"
+                  className="text-red-500 cursor-pointer"
                 >
                   <AiOutlineDelete />
                 </button>
@@ -138,21 +158,23 @@ const TodoList = () => {
           <div className="flex gap-4">
             <button
               onClick={() => setFilter("all")}
-              className={`${filter === "all" ? "underline font-semibold" : ""}`}
+              className={` cursor-pointer ${
+                filter === "all" ? "underline font-semibold" : ""
+              }`}
             >
               All
             </button>
             <button
               onClick={() => setFilter("active")}
-              className={`${
+              className={`cursor-pointer ${
                 filter === "active" ? "underline font-semibold" : ""
-              }`}
+              } `}
             >
               Active
             </button>
             <button
               onClick={() => setFilter("completed")}
-              className={`${
+              className={` cursor-pointer ${
                 filter === "completed" ? "underline font-semibold" : ""
               }`}
             >
@@ -161,7 +183,7 @@ const TodoList = () => {
           </div>
           <button
             onClick={() => dispatch({ type: "CLEAR_COMPLETED" })}
-            className="text-red-500"
+            className="text-red-500 cursor-pointer"
           >
             Clear Completed
           </button>
